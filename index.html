@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attribution des Cours</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            color: #334155;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 1200px; /* Augmenter la largeur maximale pour le tableau */
+            overflow-x: auto; /* Permet le défilement horizontal si le tableau est trop large */
+            overflow-y: auto; /* Permet le défilement vertical */
+            max-height: 95vh;
+        }
+        h2.year-title {
+            color: #1e293b;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .year-selector {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+        }
+        .year-selector button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .year-selector button:hover {
+            background-color: #2563eb;
+            transform: translateY(-2px);
+        }
+        .year-selector button.active {
+            background-color: #1d4ed8;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+            transform: translateY(0);
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 0.75rem;
+            border: 1px solid #e2e8f0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            min-width: 800px;
+        }
+        th, td {
+            padding: 0.75rem 0.7rem;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            white-space: nowrap;
+        }
+        th {
+            background-color: #f0f4f8;
+            color: #475569;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        th:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 11;
+            background-color: #f0f4f8;
+        }
+        td:first-child {
+            position: sticky;
+            left: 0;
+            background-color: #f8fafc;
+            font-weight: 500;
+            z-index: 9;
+        }
+        tr:hover td {
+            background-color: #e2e8f0;
+        }
+        tr:hover td:first-child {
+            background-color: #dbeafe;
+        }
+        .no-data {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 id="yearTitle" class="year-title"></h2>
+
+        <div id="yearSelector" class="year-selector">
+            <!-- Year selection buttons will be inserted here -->
+        </div>
+
+        <div class="table-wrapper">
+            <table id="courseMatrixTable">
+                <thead>
+                    <tr>
+                        <th>Classe / Cours</th>
+                        <!-- Course headers will be inserted here by JavaScript -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Matrix data will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div id="noDataMessage" class="no-data hidden">
+            Aucune donnée à afficher pour l'année sélectionnée ou le fichier source est vide.
+        </div>
+    </div>
+
+    <script>
+        // Raw course data from a single simulated file (e.g., gpu021.txt)
+        const rawDataSingleFileLines = `1002,2,,,"1A","JAJ","REL"
+1003,2,,,"1B","DEO","REL"
+1004,2,,,"1C","PUM","REL"
+1005,2,,,"1D","DEO","REL"
+1006,2,,,"1E","JAJ","REL"
+1007,2,,,"1F","DEO","REL"
+1008,2,,,"1G","JAJ","REL"
+1009,2,,,"1H","JAJ","REL"
+1010,2,,,"1I","PUM","REL"
+1011,2,,,"1J","DEO","REL"
+1012,2,,,"1K","JAJ","REL"
+1013,2,,,"1L","DEO","REL"
+1014,6,,,"1A","DRB","FRA"
+1015,6,,,"1B","AEM","FRA"
+1016,6,,,"1C","PUM","FRA"
+1017,6,,,"1D","MAN","FRA"
+1018,6,,,"1E","DIA","FRA"
+1019,6,,,"1F","VIV","FRA"
+1020,6,,,"1G","VAS","FRA"
+1021,6,,,"1H","MAN","FRA"
+1022,6,,,"1I","PUM","FRA"
+1023,6,,,"1J","DIA","FRA"
+1024,6,,,"1K","FLA","FRA"
+1025,6,,,"1L","DRB","FRA"
+1026,4,,,"1A","VED","EDM"
+1027,4,,,"1B","MAN","EDM"
+1028,4,,,"1C","VED","EDM"
+1029,4,,,"1D","DEO","EDM"
+1030,4,,,"1E","BRC","EDM"
+1031,4,,,"1F","DEO","EDM"
+1032,4,,,"1G","BRC","EDM"
+1033,4,,,"1H","MAN","EDM"
+1034,4,,,"1I","DMC","EDM"
+1035,4,,,"1J","DMC","EDM"
+1036,4,,,"1K","VED","EDM"
+1037,4,,,"1L","DEO","EDM"
+1038,4,,,"1A","PRP","MAT"
+1039,4,,,"1B","MOM","MAT"
+1040,4,,,"1C","HOA","MAT"
+1041,4,,,"1D","RIM","MAT"
+1042,4,,,"1E","DUC","MAT"
+1043,4,,,"1F","RIM","MAT"
+1044,4,,,"1G","MIY","MAT"
+1045,4,,,"1H","DEE","MAT"
+1046,4,,,"1I","LUN","MAT"
+1047,4,,,"1J","RIM","MAT"
+1048,4,,,"1K","DUC","MAT"
+1049,4,,,"1L","RIM","MAT"
+1050,3,,,"1A","AKM","SCI"
+1051,3,,,"1B","WON","SCI"
+1052,3,,,"1C","AKM","SCI"
+1053,3,,,"1D","BLT","SCI"
+1054,3,,,"1E","TAR","SCI"
+1055,3,,,"1F","WON","SCI"
+1056,3,,,"1G","AKM","SCI"
+1057,3,,,"1H","BLT","SCI"
+1058,3,,,"1I","WON","SCI"
+1059,3,,,"1J","WON","SCI"
+1060,3,,,"1K","TAR","SCI"
+1061,3,,,"1L","AKM","SCI"
+1062,2,,,"1A","MRC","LAT"
+1063,2,,,"1B","LMR","LAT"
+1064,2,,,"1C","ABS","LAT"
+1065,2,,,"1D","LMR","LAT"
+1066,2,,,"1E","MRC","LAT"
+1067,2,,,"1F","LMR","LAT"
+1068,2,,,"1G","ABS","LAT"
+1069,2,,,"1H","LMR","LAT"
+1070,2,,,"1I","LMR","LAT"
+1071,2,,,"1J","MRC","LAT"
+1072,2,,,"1K","LMR","LAT"
+1073,2,,,"1L","LAL","LAT"
+1074,2,,,"1A","VIB","DESS"
+1074,2,,,"1B","VIB","DESS"
+1074,2,,,"1A","HEM","TECH1"
+1074,2,,,"1B","HEM","TECH1"
+1075,2,,,"1C","VIB","DESS"
+1075,2,,,"1D","VIB","DESS"
+1075,2,,,"1C","HEM","TECH1"
+1075,2,,,"1D","HEM","TECH1"
+1076,2,,,"1E","VIB","DESS"
+1076,2,,,"1F","VIB","DESS"
+1076,2,,,"1E","HEM","TECH1"
+1076,2,,,"1F","HEM","TECH1"
+1077,2,,,"1G","VIB","DESS"
+1077,2,,,"1H","VIB","DESS"
+1077,2,,,"1G","HEM","TECH1"
+1077,2,,,"1H","HEM","TECH1"
+1078,2,,,"1I","VIB","DESS"
+1078,2,,,"1J","VIB","DESS"
+1078,2,,,"1I","HEM","TECH1"
+1078,2,,,"1J","HEM","TECH1"
+1079,2,,,"1K","VIB","DESS"
+1079,2,,,"1L","VIB","DESS"
+1079,2,,,"1K","HEM","TECH1"
+1079,2,,,"1L","HEM","TECH1"
+1080,4,,,"1B","BRF","ANGL"
+1081,4,,,"1C","MAR","ANGL"
+1082,4,,,"1D","CUG","ANGL"
+1083,4,,,"1E","BRF","ANGL"
+1084,4,,,"1F","MAF","ANGL"
+1085,4,,,"1H","MAR","ANGL"
+1086,4,,,"1I","MAF","ANGL"
+1087,4,,,"1K","KLS","ANGL"
+1088,4,,,"1L","MAE","ANGL"
+1089,4,,,"1A","MAE","ANGL"
+1089,4,,,"1G","BRF","ANGL"
+1089,4,,,"1J","CUG","ANGL"
+1089,4,,,"1A","CSN","NEER"
+1089,4,,,"1G","CSN","NEER"
+1089,4,,,"1J","CSN","NEER"
+1090,3,,,"1A","GIP","GYMG"
+1090,3,,,"1B","GIP","GYMG"
+1090,3,,,"1A","CHV","GYMF"
+1090,3,,,"1B","CHV","GYMF"
+1091,3,,,"1E","GIP","GYMG"
+1091,3,,,"1G","GIP","GYMG"
+1091,3,,,"1E","CHV","GYMF"
+1091,3,,,"1G","CHV","GYMF"
+1092,3,,,"1F","GIP","GYMG"
+1092,3,,,"1J","GIP","GYMG"
+1092,3,,,"1F","CHV","GYMF"
+1092,3,,,"1J","CHV","GYMF"
+1093,3,,,"1H","CHV","GYMG"
+1093,3,,,"1L","CHV","GYMG"
+1093,3,,,"1H","BEE","GYMF"
+1093,3,,,"1L","BEE","GYMF"
+1094,3,,,"1C","GIP","GYMG"
+1094,3,,,"1D","GIP","GYMG"
+1094,3,,,"1D","GIE","GYMG"
+1094,3,,,"1I","GIE","GYMG"
+1094,3,,,"1K","PRP","GYMG"
+1095,2,,,"1A","WIM","MULTI"
+1095,2,,,"1I","WIM","MULTI"
+1095,2,,,"1L","WIM","MULTI"
+1095,2,,,"1A","BRM","EXPR"
+1095,2,,,"1I","BRM","EXPR"
+1095,2,,,"1L","BRM","EXPR"
+1095,2,,,"1A","MOM","MINIF"
+1095,2,,,"1I","MOM","MINIF"
+1095,2,,,"1L","MOM","MINIF"
+1095,2,,,"1A","CAF","INFO"
+1095,2,,,"1I","CAF","INFO"
+1095,2,,,"1L","CAF","INFO"
+1095,2,,,"1A","SEF","LABO"
+1095,2,,,"1I","SEF","LABO"
+1095,2,,,"1L","SEF","LABO"
+1096,2,,,"1E","WIM","MULTI"
+1096,2,,,"1G","WIM","MULTI"
+1096,2,,,"1H","WIM","MULTI"
+1096,2,,,"1J","WIM","MULTI"
+1096,2,,,"1E","BRM","EXPR"
+1096,2,,,"1G","BRM","EXPR"
+1096,2,,,"1H","BRM","EXPR"
+1096,2,,,"1J","BRM","EXPR"
+1096,2,,,"1E","MOM","MINIF"
+1096,2,,,"1G","MOM","MINIF"
+1096,2,,,"1H","MOM","MINIF"
+1096,2,,,"1J","MOM","MINIF"
+1096,2,,,"1E","FLA","ARTD"
+1096,2,,,"1G","FLA","ARTD"
+1096,2,,,"1H","FLA","ARTD"
+1096,2,,,"1J","FLA","ARTD"
+1096,2,,,"1E","CAF","INFO"
+1096,2,,,"1G","CAF","INFO"
+1096,2,,,"1H","CAF","INFO"
+1096,2,,,"1J","CAF","INFO"
+1096,2,,,"1E","ANM","DANSE"
+1096,2,,,"1G","ANM","DANSE"
+1096,2,,,"1H","ANM","DANSE"
+1096,2,,,"1J","ANM","DANSE"
+1097,2,,,"1B","BEE","MULTI"
+1097,2,,,"1C","BEE","MULTI"
+1097,2,,,"1K","BEE","MULTI"
+1097,2,,,"1B","BRM","EXPR"
+1097,2,,,"1C","BRM","EXPR"
+1097,2,,,"1K","BRM","EXPR"
+1097,2,,,"1B","MOM","MINIF"
+1097,2,,,"1C","MOM","MINIF"
+1097,2,,,"1K","MOM","MINIF"
+1097,2,,,"1B","CAF","INFO"
+1097,2,,,"1C","CAF","INFO"
+1097,2,,,"1K","CAF","INFO"
+1097,2,,,"1B","TAR","LABO"
+1097,2,,,"1C","TAR","LABO"
+1097,2,,,"1K","TAR","LABO"
+1098,2,,,"1D","WIM","MULTI"
+1098,2,,,"1F","WIM","MULTI"
+1098,2,,,"1D","BRM","EXPR"
+1098,2,,,"1F","BRM","EXPR"
+1098,2,,,"1D","CUG","MINIF"
+1098,2,,,"1F","CUG","MINIF"`.split('\n'); // Split into lines
+
+        // Simulate data from 7 files, modifying the first digit of the course number for each "year"
+        let fullRawData = [];
+        for (let i = 1; i <= 7; i++) { // Loop for years 1 to 7
+            const yearPrefix = String(i);
+            const modifiedLines = rawDataSingleFileLines.map(line => {
+                const parts = line.split(',');
+                if (parts[0] && parts[0].length > 0) {
+                    // Replace the first character of the course number with the current yearPrefix
+                    parts[0] = yearPrefix + parts[0].substring(1);
+                }
+                return parts.join(',');
+            });
+            fullRawData.push(...modifiedLines); // Add modified lines to the full data array
+        }
+        const rawData = fullRawData.join('\n'); // Join all lines to form the complete rawData string
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const courseMatrixTable = document.getElementById('courseMatrixTable');
+            const tableHeadRow = courseMatrixTable.querySelector('thead tr');
+            const tableBody = courseMatrixTable.querySelector('tbody');
+            const noDataMessage = document.getElementById('noDataMessage');
+            const yearTitle = document.getElementById('yearTitle');
+            const yearSelector = document.getElementById('yearSelector');
+            const lines = rawData.trim().split('\n');
+
+            if (lines.length === 0 || (lines.length === 1 && lines[0].trim() === '')) {
+                noDataMessage.classList.remove('hidden');
+                return;
+            }
+
+            // Map: year -> Map: className -> Map: courseGiven -> professorName
+            const allYearsData = new Map();
+            const uniqueYears = new Set();
+
+            // Function to convert digit to French ordinal
+            const getFrenchOrdinalYear = (yearDigit) => {
+                const ordinals = {
+                    '1': 'première',
+                    '2': 'deuxième',
+                    '3': 'troisième',
+                    '4': 'quatrième',
+                    '5': 'cinquième',
+                    '6': 'sixième',
+                    '7': 'septième',
+                    '8': 'huitième',
+                    '9': 'neuvième',
+                    '0': 'dixième' // Assuming '0' might represent 10th year if applicable
+                };
+                return ordinals[yearDigit] || `${yearDigit}e`; // Fallback for unexpected digits
+            };
+
+            lines.forEach(line => {
+                const parts = line.split(',');
+
+                if (parts.length >= 7) {
+                    const courseNumber = parts[0].trim();
+                    const year = courseNumber.charAt(0); // Extract year from the first digit
+                    const className = parts[4].replace(/"/g, '').trim();
+                    const professorName = parts[5].replace(/"/g, '').trim();
+                    const courseGiven = parts[6].replace(/"/g, '').trim();
+
+                    uniqueYears.add(year);
+
+                    if (!allYearsData.has(year)) {
+                        allYearsData.set(year, new Map()); // Map: className -> Map: courseGiven -> professorName
+                    }
+                    const yearData = allYearsData.get(year);
+
+                    if (!yearData.has(className)) {
+                        yearData.set(className, new Map());
+                    }
+                    yearData.get(className).set(courseGiven, professorName);
+                }
+            });
+
+            const sortedYears = Array.from(uniqueYears).sort();
+            let currentSelectedYear = sortedYears[0]; // Default to the first year
+
+            // Function to render the table for a given year
+            const renderTableForYear = (yearToRender) => {
+                // Clear existing table content
+                tableHeadRow.innerHTML = '<th>Classe / Cours</th>'; // Reset header
+                tableBody.innerHTML = '';
+                noDataMessage.classList.add('hidden');
+
+                const yearData = allYearsData.get(yearToRender);
+
+                if (!yearData || yearData.size === 0) {
+                    noDataMessage.classList.remove('hidden');
+                    yearTitle.textContent = `Attribution des cours de la ${getFrenchOrdinalYear(yearToRender)} année`;
+                    return;
+                }
+
+                const uniqueClassesForYear = new Set();
+                const uniqueCoursesForYear = new Set();
+
+                // Collect unique classes and courses for the current year
+                yearData.forEach((classMap, className) => {
+                    uniqueClassesForYear.add(className);
+                    classMap.forEach((professor, course) => {
+                        uniqueCoursesForYear.add(course);
+                    });
+                });
+
+                const sortedClasses = Array.from(uniqueClassesForYear).sort();
+                const sortedCourses = Array.from(uniqueCoursesForYear).sort();
+
+                // Update the year title
+                yearTitle.textContent = `Attribution des cours de la ${getFrenchOrdinalYear(yearToRender)} année`;
+
+                // Populate table headers (courses)
+                sortedCourses.forEach(course => {
+                    const th = document.createElement('th');
+                    th.textContent = course;
+                    tableHeadRow.appendChild(th);
+                });
+
+                // Populate table body
+                sortedClasses.forEach(className => {
+                    const row = tableBody.insertRow();
+                    const classHeaderCell = row.insertCell();
+                    classHeaderCell.textContent = className; // First cell is the class name
+
+                    sortedCourses.forEach(courseName => {
+                        const cell = row.insertCell();
+                        const professor = yearData.has(className) &&
+                                          yearData.get(className).has(courseName) ?
+                                          yearData.get(className).get(courseName) : '/';
+                        cell.textContent = professor;
+                    });
+                });
+            };
+
+            // Create year selection buttons
+            sortedYears.forEach(year => {
+                const button = document.createElement('button');
+                button.textContent = `${getFrenchOrdinalYear(year)} année`;
+                button.dataset.year = year; // Store the year in a data attribute
+                button.classList.add('rounded-lg', 'px-4', 'py-2', 'font-semibold', 'text-white', 'shadow-md', 'transition-all', 'duration-200');
+
+                button.addEventListener('click', () => {
+                    // Remove active class from all buttons
+                    document.querySelectorAll('.year-selector button').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    // Add active class to the clicked button
+                    button.classList.add('active');
+                    currentSelectedYear = year;
+                    renderTableForYear(year);
+                });
+                yearSelector.appendChild(button);
+            });
+
+            // Initially render the table for the first year and set its button as active
+            if (sortedYears.length > 0) {
+                renderTableForYear(currentSelectedYear);
+                yearSelector.querySelector(`button[data-year="${currentSelectedYear}"]`).classList.add('active');
+            } else {
+                noDataMessage.classList.remove('hidden');
+                yearTitle.textContent = `Attribution des cours`;
+            }
+        });
+    </script>
+</body>
+</html>
