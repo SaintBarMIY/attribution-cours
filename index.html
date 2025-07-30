@@ -23,9 +23,9 @@
             border-radius: 1rem;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             width: 100%;
-            max-width: 1200px; /* Augmenter la largeur maximale pour le tableau */
-            overflow-x: auto; /* Permet le défilement horizontal si le tableau est trop large */
-            overflow-y: auto; /* Permet le défilement vertical */
+            max-width: 1200px;
+            overflow-x: auto;
+            overflow-y: auto;
             max-height: 95vh;
         }
         h2.year-title {
@@ -40,7 +40,7 @@
             justify-content: center;
             gap: 1rem;
             margin-bottom: 1.5rem;
-            flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+            flex-wrap: wrap;
         }
         .year-selector button {
             background-color: #3b82f6;
@@ -111,6 +111,12 @@
             padding: 2rem;
             color: #64748b;
         }
+        .loading-message {
+            text-align: center;
+            padding: 2rem;
+            color: #475569;
+            font-size: 1.2rem;
+        }
     </style>
 </head>
 <body>
@@ -135,13 +141,17 @@
             </table>
         </div>
 
+        <div id="loadingMessage" class="loading-message">
+            Chargement des données...
+        </div>
         <div id="noDataMessage" class="no-data hidden">
-            Aucune donnée à afficher pour l'année sélectionnée ou le fichier source est vide.
+            Aucune donnée à afficher pour l'année sélectionnée ou une erreur est survenue lors du chargement des fichiers.
         </div>
     </div>
 
     <script>
         // Raw course data from a single simulated file (e.g., gpu021.txt)
+        // This is used as a base to simulate different years if actual Gist files are not provided
         const rawDataSingleFileLines = `1002,2,,,"1A","JAJ","REL"
 1003,2,,,"1B","DEO","REL"
 1004,2,,,"1C","PUM","REL"
@@ -335,36 +345,37 @@
 1098,2,,,"1D","CUG","MINIF"
 1098,2,,,"1F","CUG","MINIF"`.split('\n'); // Split into lines
 
-        // Simulate data from 7 files, modifying the first digit of the course number for each "year"
-        let fullRawData = [];
-        for (let i = 1; i <= 7; i++) { // Loop for years 1 to 7
-            const yearPrefix = String(i);
-            const modifiedLines = rawDataSingleFileLines.map(line => {
-                const parts = line.split(',');
-                if (parts[0] && parts[0].length > 0) {
-                    // Replace the first character of the course number with the current yearPrefix
-                    parts[0] = yearPrefix + parts[0].substring(1);
-                }
-                return parts.join(',');
-            });
-            fullRawData.push(...modifiedLines); // Add modified lines to the full data array
-        }
-        const rawData = fullRawData.join('\n'); // Join all lines to form the complete rawData string
-
-
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             const courseMatrixTable = document.getElementById('courseMatrixTable');
             const tableHeadRow = courseMatrixTable.querySelector('thead tr');
             const tableBody = courseMatrixTable.querySelector('tbody');
             const noDataMessage = document.getElementById('noDataMessage');
+            const loadingMessage = document.getElementById('loadingMessage');
             const yearTitle = document.getElementById('yearTitle');
             const yearSelector = document.getElementById('yearSelector');
-            const lines = rawData.trim().split('\n');
 
-            if (lines.length === 0 || (lines.length === 1 && lines[0].trim() === '')) {
-                noDataMessage.classList.remove('hidden');
-                return;
-            }
+            // Hide table and show loading message initially
+            courseMatrixTable.style.display = 'none';
+            noDataMessage.classList.add('hidden');
+            loadingMessage.classList.remove('hidden');
+
+            // --- Configuration des URLs de vos fichiers Gist ---
+            // REMPLACEZ CES URLS PAR LES URLS BRUTES RÉELLES DE VOS FICHIERS SUR GITHUB GIST.
+            // Exemple de format d'URL brute pour un Gist:
+            // https://gist.githubusercontent.com/VOTRE_NOM_UTILISATEUR/ID_DU_GIST/raw/COMMIT_HASH/nom_du_fichier.txt
+            const gistFileUrls = [
+                // Simulez les URLs pour gpu021.txt à gpu027.txt
+                // Pour une démonstration, j'utilise une URL générique et je simule le contenu
+                // Dans un cas réel, chaque URL devrait pointer vers un fichier différent.
+                'https://gist.githubusercontent.com/YOUR_USERNAME/YOUR_GIST_ID/raw/YOUR_COMMIT_HASH/gpu021.txt',
+                'https://gist.githubusercontent.com/YOUR_USERNAME/YOUR_GIST_ID/raw/YOUR_COMMIT_HASH/gpu022.txt',
+                'https://gist.githubusercontent.com/YOUR_USERNAME/YOUR_GIST_ID/raw/YOUR_COMMIT_HASH/gpu023.txt',
+                'https://gist.githubusercontent.com/YOUR_USERNAME/YOUR_GIST_ID/raw/YOUR_COMMIT_HASH/gpu024.txt',
+                'https://gist.githubusercontent.com/YOUR_USERNAME/YOUR_GIST_ID/raw/YOUR_COMMIT_HASH/gpu025.txt',
+                'https://gist.githubusercontent.com/SaintBarMIY/8a540490f54b188509e90d7b8e03c740/raw/71bd474dcbb5d1ac36abcfaafc2a09090eaf9678/gpu026',
+                'https://gist.githubusercontent.com/YOUR_USERNAME/YOUR_GIST_ID/raw/YOUR_COMMIT_HASH/gpu027.txt'
+            ];
+            // ---------------------------------------------------
 
             // Map: year -> Map: className -> Map: courseGiven -> professorName
             const allYearsData = new Map();
@@ -387,115 +398,165 @@
                 return ordinals[yearDigit] || `${yearDigit}e`; // Fallback for unexpected digits
             };
 
-            lines.forEach(line => {
-                const parts = line.split(',');
+            // Function to process a single file's content
+            const processFileContent = (fileContent, yearIndex) => {
+                const lines = fileContent.trim().split('\n');
+                const yearPrefix = String(yearIndex + 1); // Year 1, 2, ..., 7
 
-                if (parts.length >= 7) {
-                    const courseNumber = parts[0].trim();
-                    const year = courseNumber.charAt(0); // Extract year from the first digit
-                    const className = parts[4].replace(/"/g, '').trim();
-                    const professorName = parts[5].replace(/"/g, '').trim();
-                    const courseGiven = parts[6].replace(/"/g, '').trim();
+                lines.forEach(line => {
+                    const parts = line.split(',');
+                    if (parts.length >= 7) {
+                        // Modify the course number based on the file's simulated year
+                        let courseNumber = parts[0].trim();
+                        if (courseNumber.length > 0) {
+                            courseNumber = yearPrefix + courseNumber.substring(1);
+                        } else {
+                            // Handle case where courseNumber might be empty
+                            courseNumber = yearPrefix + '000'; // Default if empty
+                        }
 
-                    uniqueYears.add(year);
+                        const year = courseNumber.charAt(0); // Extract year from the modified course number
+                        const className = parts[4].replace(/"/g, '').trim();
+                        const professorName = parts[5].replace(/"/g, '').trim();
+                        const courseGiven = parts[6].replace(/"/g, '').trim();
 
-                    if (!allYearsData.has(year)) {
-                        allYearsData.set(year, new Map()); // Map: className -> Map: courseGiven -> professorName
+                        uniqueYears.add(year);
+
+                        if (!allYearsData.has(year)) {
+                            allYearsData.set(year, new Map());
+                        }
+                        const yearData = allYearsData.get(year);
+
+                        if (!yearData.has(className)) {
+                            yearData.set(className, new Map());
+                        }
+                        // Store professor for this class and course. If multiple, last one wins.
+                        yearData.get(className).set(courseGiven, professorName);
                     }
-                    const yearData = allYearsData.get(year);
-
-                    if (!yearData.has(className)) {
-                        yearData.set(className, new Map());
-                    }
-                    yearData.get(className).set(courseGiven, professorName);
-                }
-            });
-
-            const sortedYears = Array.from(uniqueYears).sort();
-            let currentSelectedYear = sortedYears[0]; // Default to the first year
-
-            // Function to render the table for a given year
-            const renderTableForYear = (yearToRender) => {
-                // Clear existing table content
-                tableHeadRow.innerHTML = '<th>Classe / Cours</th>'; // Reset header
-                tableBody.innerHTML = '';
-                noDataMessage.classList.add('hidden');
-
-                const yearData = allYearsData.get(yearToRender);
-
-                if (!yearData || yearData.size === 0) {
-                    noDataMessage.classList.remove('hidden');
-                    yearTitle.textContent = `Attribution des cours de la ${getFrenchOrdinalYear(yearToRender)} année`;
-                    return;
-                }
-
-                const uniqueClassesForYear = new Set();
-                const uniqueCoursesForYear = new Set();
-
-                // Collect unique classes and courses for the current year
-                yearData.forEach((classMap, className) => {
-                    uniqueClassesForYear.add(className);
-                    classMap.forEach((professor, course) => {
-                        uniqueCoursesForYear.add(course);
-                    });
-                });
-
-                const sortedClasses = Array.from(uniqueClassesForYear).sort();
-                const sortedCourses = Array.from(uniqueCoursesForYear).sort();
-
-                // Update the year title
-                yearTitle.textContent = `Attribution des cours de la ${getFrenchOrdinalYear(yearToRender)} année`;
-
-                // Populate table headers (courses)
-                sortedCourses.forEach(course => {
-                    const th = document.createElement('th');
-                    th.textContent = course;
-                    tableHeadRow.appendChild(th);
-                });
-
-                // Populate table body
-                sortedClasses.forEach(className => {
-                    const row = tableBody.insertRow();
-                    const classHeaderCell = row.insertCell();
-                    classHeaderCell.textContent = className; // First cell is the class name
-
-                    sortedCourses.forEach(courseName => {
-                        const cell = row.insertCell();
-                        const professor = yearData.has(className) &&
-                                          yearData.get(className).has(courseName) ?
-                                          yearData.get(className).get(courseName) : '/';
-                        cell.textContent = professor;
-                    });
                 });
             };
 
-            // Create year selection buttons
-            sortedYears.forEach(year => {
-                const button = document.createElement('button');
-                button.textContent = `${getFrenchOrdinalYear(year)} année`;
-                button.dataset.year = year; // Store the year in a data attribute
-                button.classList.add('rounded-lg', 'px-4', 'py-2', 'font-semibold', 'text-white', 'shadow-md', 'transition-all', 'duration-200');
+            try {
+                // In a real scenario, you would fetch from actual Gist URLs.
+                // For this example, we simulate fetching by using the rawDataSingleFileLines
+                // and modifying them to represent different years.
+                const fetchedContents = await Promise.all(gistFileUrls.map(async (url, index) => {
+                    // This block simulates fetching. In a real app, replace with actual fetch:
+                    // const response = await fetch(url);
+                    // if (!response.ok) throw new Error(`HTTP error! status: ${response.status} for ${url}`);
+                    // return await response.text();
 
-                button.addEventListener('click', () => {
-                    // Remove active class from all buttons
-                    document.querySelectorAll('.year-selector button').forEach(btn => {
-                        btn.classList.remove('active');
-                    });
-                    // Add active class to the clicked button
-                    button.classList.add('active');
-                    currentSelectedYear = year;
-                    renderTableForYear(year);
+                    // Simulation: Use rawDataSingleFileLines and modify course numbers
+                    const yearPrefix = String(index + 1);
+                    return rawDataSingleFileLines.map(line => {
+                        const parts = line.split(',');
+                        if (parts[0] && parts[0].length > 0) {
+                            parts[0] = yearPrefix + parts[0].substring(1);
+                        }
+                        return parts.join(',');
+                    }).join('\n');
+                }));
+
+                fetchedContents.forEach((content, index) => {
+                    processFileContent(content, index);
                 });
-                yearSelector.appendChild(button);
-            });
 
-            // Initially render the table for the first year and set its button as active
-            if (sortedYears.length > 0) {
-                renderTableForYear(currentSelectedYear);
-                yearSelector.querySelector(`button[data-year="${currentSelectedYear}"]`).classList.add('active');
-            } else {
+                // Hide loading message
+                loadingMessage.classList.add('hidden');
+                courseMatrixTable.style.display = 'table'; // Show table
+
+                const sortedYears = Array.from(uniqueYears).sort();
+                let currentSelectedYear = sortedYears[0]; // Default to the first year
+
+                // Function to render the table for a given year
+                const renderTableForYear = (yearToRender) => {
+                    // Clear existing table content
+                    tableHeadRow.innerHTML = '<th>Classe / Cours</th>'; // Reset header
+                    tableBody.innerHTML = '';
+                    noDataMessage.classList.add('hidden');
+
+                    const yearData = allYearsData.get(yearToRender);
+
+                    if (!yearData || yearData.size === 0) {
+                        noDataMessage.classList.remove('hidden');
+                        yearTitle.textContent = `Attribution des cours de la ${getFrenchOrdinalYear(yearToRender)} année`;
+                        return;
+                    }
+
+                    const uniqueClassesForYear = new Set();
+                    const uniqueCoursesForYear = new Set();
+
+                    // Collect unique classes and courses for the current year
+                    yearData.forEach((classMap, className) => {
+                        uniqueClassesForYear.add(className);
+                        classMap.forEach((professor, course) => {
+                            uniqueCoursesForYear.add(course);
+                        });
+                    });
+
+                    const sortedClasses = Array.from(uniqueClassesForYear).sort();
+                    const sortedCourses = Array.from(uniqueCoursesForYear).sort();
+
+                    // Update the year title
+                    yearTitle.textContent = `Attribution des cours de la ${getFrenchOrdinalYear(yearToRender)} année`;
+
+                    // Populate table headers (courses)
+                    sortedCourses.forEach(course => {
+                        const th = document.createElement('th');
+                        th.textContent = course;
+                        tableHeadRow.appendChild(th);
+                    });
+
+                    // Populate table body
+                    sortedClasses.forEach(className => {
+                        const row = tableBody.insertRow();
+                        const classHeaderCell = row.insertCell();
+                        classHeaderCell.textContent = className; // First cell is the class name
+
+                        sortedCourses.forEach(courseName => {
+                            const cell = row.insertCell();
+                            const professor = yearData.has(className) &&
+                                              yearData.get(className).has(courseName) ?
+                                              yearData.get(className).get(courseName) : '/';
+                            cell.textContent = professor;
+                        });
+                    });
+                };
+
+                // Create year selection buttons
+                sortedYears.forEach(year => {
+                    const button = document.createElement('button');
+                    button.textContent = `${getFrenchOrdinalYear(year)} année`;
+                    button.dataset.year = year; // Store the year in a data attribute
+                    button.classList.add('rounded-lg', 'px-4', 'py-2', 'font-semibold', 'text-white', 'shadow-md', 'transition-all', 'duration-200');
+
+                    button.addEventListener('click', () => {
+                        // Remove active class from all buttons
+                        document.querySelectorAll('.year-selector button').forEach(btn => {
+                            btn.classList.remove('active');
+                        });
+                        // Add active class to the clicked button
+                        button.classList.add('active');
+                        currentSelectedYear = year;
+                        renderTableForYear(year);
+                    });
+                    yearSelector.appendChild(button);
+                });
+
+                // Initially render the table for the first year and set its button as active
+                if (sortedYears.length > 0) {
+                    renderTableForYear(currentSelectedYear);
+                    yearSelector.querySelector(`button[data-year="${currentSelectedYear}"]`).classList.add('active');
+                } else {
+                    noDataMessage.classList.remove('hidden');
+                    yearTitle.textContent = `Attribution des cours`;
+                }
+
+            } catch (error) {
+                console.error("Erreur lors du chargement des fichiers Gist :", error);
+                loadingMessage.classList.add('hidden');
                 noDataMessage.classList.remove('hidden');
-                yearTitle.textContent = `Attribution des cours`;
+                yearTitle.textContent = `Erreur de chargement des données`;
             }
         });
     </script>
