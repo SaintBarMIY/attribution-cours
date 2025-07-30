@@ -150,201 +150,6 @@
     </div>
 
     <script>
-        // Raw course data from a single simulated file (e.g., gpu021.txt)
-        // This is used as a base to simulate different years if actual Gist files are not provided
-        const rawDataSingleFileLines = `1002,2,,,"1A","JAJ","REL"
-1003,2,,,"1B","DEO","REL"
-1004,2,,,"1C","PUM","REL"
-1005,2,,,"1D","DEO","REL"
-1006,2,,,"1E","JAJ","REL"
-1007,2,,,"1F","DEO","REL"
-1008,2,,,"1G","JAJ","REL"
-1009,2,,,"1H","JAJ","REL"
-1010,2,,,"1I","PUM","REL"
-1011,2,,,"1J","DEO","REL"
-1012,2,,,"1K","JAJ","REL"
-1013,2,,,"1L","DEO","REL"
-1014,6,,,"1A","DRB","FRA"
-1015,6,,,"1B","AEM","FRA"
-1016,6,,,"1C","PUM","FRA"
-1017,6,,,"1D","MAN","FRA"
-1018,6,,,"1E","DIA","FRA"
-1019,6,,,"1F","VIV","FRA"
-1020,6,,,"1G","VAS","FRA"
-1021,6,,,"1H","MAN","FRA"
-1022,6,,,"1I","PUM","FRA"
-1023,6,,,"1J","DIA","FRA"
-1024,6,,,"1K","FLA","FRA"
-1025,6,,,"1L","DRB","FRA"
-1026,4,,,"1A","VED","EDM"
-1027,4,,,"1B","MAN","EDM"
-1028,4,,,"1C","VED","EDM"
-1029,4,,,"1D","DEO","EDM"
-1030,4,,,"1E","BRC","EDM"
-1031,4,,,"1F","DEO","EDM"
-1032,4,,,"1G","BRC","EDM"
-1033,4,,,"1H","MAN","EDM"
-1034,4,,,"1I","DMC","EDM"
-1035,4,,,"1J","DMC","EDM"
-1036,4,,,"1K","VED","EDM"
-1037,4,,,"1L","DEO","EDM"
-1038,4,,,"1A","PRP","MAT"
-1039,4,,,"1B","MOM","MAT"
-1040,4,,,"1C","HOA","MAT"
-1041,4,,,"1D","RIM","MAT"
-1042,4,,,"1E","DUC","MAT"
-1043,4,,,"1F","RIM","MAT"
-1044,4,,,"1G","MIY","MAT"
-1045,4,,,"1H","DEE","MAT"
-1046,4,,,"1I","LUN","MAT"
-1047,4,,,"1J","RIM","MAT"
-1048,4,,,"1K","DUC","MAT"
-1049,4,,,"1L","RIM","MAT"
-1050,3,,,"1A","AKM","SCI"
-1051,3,,,"1B","WON","SCI"
-1052,3,,,"1C","AKM","SCI"
-1053,3,,,"1D","BLT","SCI"
-1054,3,,,"1E","TAR","SCI"
-1055,3,,,"1F","WON","SCI"
-1056,3,,,"1G","AKM","SCI"
-1057,3,,,"1H","BLT","SCI"
-1058,3,,,"1I","WON","SCI"
-1059,3,,,"1J","WON","SCI"
-1060,3,,,"1K","TAR","SCI"
-1061,3,,,"1L","AKM","SCI"
-1062,2,,,"1A","MRC","LAT"
-1063,2,,,"1B","LMR","LAT"
-1064,2,,,"1C","ABS","LAT"
-1065,2,,,"1D","LMR","LAT"
-1066,2,,,"1E","MRC","LAT"
-1067,2,,,"1F","LMR","LAT"
-1068,2,,,"1G","ABS","LAT"
-1069,2,,,"1H","LMR","LAT"
-1070,2,,,"1I","LMR","LAT"
-1071,2,,,"1J","MRC","LAT"
-1072,2,,,"1K","LMR","LAT"
-1073,2,,,"1L","LAL","LAT"
-1074,2,,,"1A","VIB","DESS"
-1074,2,,,"1B","VIB","DESS"
-1074,2,,,"1A","HEM","TECH1"
-1074,2,,,"1B","HEM","TECH1"
-1075,2,,,"1C","VIB","DESS"
-1075,2,,,"1D","VIB","DESS"
-1075,2,,,"1C","HEM","TECH1"
-1075,2,,,"1D","HEM","TECH1"
-1076,2,,,"1E","VIB","DESS"
-1076,2,,,"1F","VIB","DESS"
-1076,2,,,"1E","HEM","TECH1"
-1076,2,,,"1F","HEM","TECH1"
-1077,2,,,"1G","VIB","DESS"
-1077,2,,,"1H","VIB","DESS"
-1077,2,,,"1G","HEM","TECH1"
-1077,2,,,"1H","HEM","TECH1"
-1078,2,,,"1I","VIB","DESS"
-1078,2,,,"1J","VIB","DESS"
-1078,2,,,"1I","HEM","TECH1"
-1078,2,,,"1J","HEM","TECH1"
-1079,2,,,"1K","VIB","DESS"
-1079,2,,,"1L","VIB","DESS"
-1079,2,,,"1K","HEM","TECH1"
-1079,2,,,"1L","HEM","TECH1"
-1080,4,,,"1B","BRF","ANGL"
-1081,4,,,"1C","MAR","ANGL"
-1082,4,,,"1D","CUG","ANGL"
-1083,4,,,"1E","BRF","ANGL"
-1084,4,,,"1F","MAF","ANGL"
-1085,4,,,"1H","MAR","ANGL"
-1086,4,,,"1I","MAF","ANGL"
-1087,4,,,"1K","KLS","ANGL"
-1088,4,,,"1L","MAE","ANGL"
-1089,4,,,"1A","MAE","ANGL"
-1089,4,,,"1G","BRF","ANGL"
-1089,4,,,"1J","CUG","ANGL"
-1089,4,,,"1A","CSN","NEER"
-1089,4,,,"1G","CSN","NEER"
-1089,4,,,"1J","CSN","NEER"
-1090,3,,,"1A","GIP","GYMG"
-1090,3,,,"1B","GIP","GYMG"
-1090,3,,,"1A","CHV","GYMF"
-1090,3,,,"1B","CHV","GYMF"
-1091,3,,,"1E","GIP","GYMG"
-1091,3,,,"1G","GIP","GYMG"
-1091,3,,,"1E","CHV","GYMF"
-1091,3,,,"1G","CHV","GYMF"
-1092,3,,,"1F","GIP","GYMG"
-1092,3,,,"1J","GIP","GYMG"
-1092,3,,,"1F","CHV","GYMF"
-1092,3,,,"1J","CHV","GYMF"
-1093,3,,,"1H","CHV","GYMG"
-1093,3,,,"1L","CHV","GYMG"
-1093,3,,,"1H","BEE","GYMF"
-1093,3,,,"1L","BEE","GYMF"
-1094,3,,,"1C","GIP","GYMG"
-1094,3,,,"1D","GIP","GYMG"
-1094,3,,,"1D","GIE","GYMG"
-1094,3,,,"1I","GIE","GYMG"
-1094,3,,,"1K","PRP","GYMG"
-1095,2,,,"1A","WIM","MULTI"
-1095,2,,,"1I","WIM","MULTI"
-1095,2,,,"1L","WIM","MULTI"
-1095,2,,,"1A","BRM","EXPR"
-1095,2,,,"1I","BRM","EXPR"
-1095,2,,,"1L","BRM","EXPR"
-1095,2,,,"1A","MOM","MINIF"
-1095,2,,,"1I","MOM","MINIF"
-1095,2,,,"1L","MOM","MINIF"
-1095,2,,,"1A","CAF","INFO"
-1095,2,,,"1I","CAF","INFO"
-1095,2,,,"1L","CAF","INFO"
-1095,2,,,"1A","SEF","LABO"
-1095,2,,,"1I","SEF","LABO"
-1095,2,,,"1L","SEF","LABO"
-1096,2,,,"1E","WIM","MULTI"
-1096,2,,,"1G","WIM","MULTI"
-1096,2,,,"1H","WIM","MULTI"
-1096,2,,,"1J","WIM","MULTI"
-1096,2,,,"1E","BRM","EXPR"
-1096,2,,,"1G","BRM","EXPR"
-1096,2,,,"1H","BRM","EXPR"
-1096,2,,,"1J","BRM","EXPR"
-1096,2,,,"1E","MOM","MINIF"
-1096,2,,,"1G","MOM","MINIF"
-1096,2,,,"1H","MOM","MINIF"
-1096,2,,,"1J","MOM","MINIF"
-1096,2,,,"1E","FLA","ARTD"
-1096,2,,,"1G","FLA","ARTD"
-1096,2,,,"1H","FLA","ARTD"
-1096,2,,,"1J","FLA","ARTD"
-1096,2,,,"1E","CAF","INFO"
-1096,2,,,"1G","CAF","INFO"
-1096,2,,,"1H","CAF","INFO"
-1096,2,,,"1J","CAF","INFO"
-1096,2,,,"1E","ANM","DANSE"
-1096,2,,,"1G","ANM","DANSE"
-1096,2,,,"1H","ANM","DANSE"
-1096,2,,,"1J","ANM","DANSE"
-1097,2,,,"1B","BEE","MULTI"
-1097,2,,,"1C","BEE","MULTI"
-1097,2,,,"1K","BEE","MULTI"
-1097,2,,,"1B","BRM","EXPR"
-1097,2,,,"1C","BRM","EXPR"
-1097,2,,,"1K","BRM","EXPR"
-1097,2,,,"1B","MOM","MINIF"
-1097,2,,,"1C","MOM","MINIF"
-1097,2,,,"1K","MOM","MINIF"
-1097,2,,,"1B","CAF","INFO"
-1097,2,,,"1C","CAF","INFO"
-1097,2,,,"1K","CAF","INFO"
-1097,2,,,"1B","TAR","LABO"
-1097,2,,,"1C","TAR","LABO"
-1097,2,,,"1K","TAR","LABO"
-1098,2,,,"1D","WIM","MULTI"
-1098,2,,,"1F","WIM","MULTI"
-1098,2,,,"1D","BRM","EXPR"
-1098,2,,,"1F","BRM","EXPR"
-1098,2,,,"1D","CUG","MINIF"
-1098,2,,,"1F","CUG","MINIF"`.split('\n'); // Split into lines
-
         document.addEventListener('DOMContentLoaded', async () => {
             const courseMatrixTable = document.getElementById('courseMatrixTable');
             const tableHeadRow = courseMatrixTable.querySelector('thead tr');
@@ -361,19 +166,17 @@
 
             // --- Configuration des URLs de vos fichiers Gist ---
             // REMPLACEZ CES URLS PAR LES URLS BRUTES RÉELLES DE VOS FICHIERS SUR GITHUB GIST.
-            // Exemple de format d'URL brute pour un Gist:
-            // https://gist.githubusercontent.com/VOTRE_NOM_UTILISATEUR/ID_DU_GIST/raw/COMMIT_HASH/nom_du_fichier.txt
+            // Chaque URL doit pointer vers le contenu brut d'un fichier (ex: gpu021.txt, gpu022.txt, etc.)
+            // Pour obtenir l'URL brute d'un fichier dans un Gist: allez sur votre Gist, cliquez sur le fichier,
+            // puis cliquez sur le bouton "Raw". Copiez l'URL de cette page.
             const gistFileUrls = [
-                // Simulez les URLs pour gpu021.txt à gpu027.txt
-                // Pour une démonstration, j'utilise une URL générique et je simule le contenu
-                // Dans un cas réel, chaque URL devrait pointer vers un fichier différent.
-                'https://gist.githubusercontent.com/SaintBarMIY/e117e057421013b38d2cc63001bf7831/raw/93e4195d34502d080512488b545f7d231c988e81/gpu021.txt',
-                'https://gist.githubusercontent.com/SaintBarMIY/931c3142b68f72b5abd391b88a0a2b01/raw/2226fcc8bcaa917c0fb0e2d49dd8e251696a05ec/gpu022.txt',
-                'https://gist.githubusercontent.com/SaintBarMIY/108ea2963b442db4915b588d5a73f0a8/raw/9db80d3c40f7f562a53fb64ae762ff51319c5d2d/gpu023.txt',
-                'https://gist.githubusercontent.com/SaintBarMIY/795d32d78a2a3d89f7b6783bdf1b84de/raw/f547a4033aef389c746ba2bc60f3f47f5ce42950/gpu024.txt',
-                'https://gist.githubusercontent.com/SaintBarMIY/16a0285aa679441b583c999e58b466f0/raw/24971e499efb83d17531bccb3d38f956533f193f/gpu025.txt',
+                'https://gist.githubusercontent.com/SaintBarMIY/8a540490f54b188509e90d7b8e03c740/raw/71bd474dcbb5d1ac36abcfaafc2a09090eaf9678/gpu021.txt',
+                'https://gist.githubusercontent.com/SaintBarMIY/8a540490f54b188509e90d7b8e03c740/raw/71bd474dcbb5d1ac36abcfaafc2a09090eaf9678/gpu022.txt',
+                'https://gist.githubusercontent.com/SaintBarMIY/8a540490f54b188509e90d7b8e03c740/raw/71bd474dcbb5d1ac36abcfaafc2a09090eaf9678/gpu023.txt',
+                'https://gist.githubusercontent.com/SaintBarMIY/8a540490f54b188509e90d7b8e03c740/raw/71bd474dcbb5d1ac36abcfaafc2a09090eaf9678/gpu024.txt',
+                'https://gist.githubusercontent.com/SaintBarMIY/8a540490f54b188509e90d7b8e03c740/raw/71bd474dcbb5d1ac36abcfaafc2a09090eaf9678/gpu025.txt',
                 'https://gist.githubusercontent.com/SaintBarMIY/8a540490f54b188509e90d7b8e03c740/raw/71bd474dcbb5d1ac36abcfaafc2a09090eaf9678/gpu026.txt',
-                'https://gist.githubusercontent.com/SaintBarMIY/ce99b96e426a86fab10d2a96c0b6f082/raw/f380f4726a0fd70414f9a0f88d79b7e9655ba915/gpu027.txt'
+                'https://gist.githubusercontent.com/SaintBarMIY/8a540490f54b188509e90d7b8e03c740/raw/71bd474dcbb5d1ac36abcfaafc2a09090eaf9678/gpu027.txt'
             ];
             // ---------------------------------------------------
 
@@ -407,11 +210,12 @@
                     const parts = line.split(',');
                     if (parts.length >= 7) {
                         // Modify the course number based on the file's simulated year
+                        // This logic ensures that even if original Gist files have '1',
+                        // they are treated as '1', '2', '3', etc., based on their position in gistFileUrls.
                         let courseNumber = parts[0].trim();
                         if (courseNumber.length > 0) {
                             courseNumber = yearPrefix + courseNumber.substring(1);
                         } else {
-                            // Handle case where courseNumber might be empty
                             courseNumber = yearPrefix + '000'; // Default if empty
                         }
 
@@ -430,35 +234,28 @@
                         if (!yearData.has(className)) {
                             yearData.set(className, new Map());
                         }
-                        // Store professor for this class and course. If multiple, last one wins.
                         yearData.get(className).set(courseGiven, professorName);
                     }
                 });
             };
 
             try {
-                // In a real scenario, you would fetch from actual Gist URLs.
-                // For this example, we simulate fetching by using the rawDataSingleFileLines
-                // and modifying them to represent different years.
-                const fetchedContents = await Promise.all(gistFileUrls.map(async (url, index) => {
-                    // This block simulates fetching. In a real app, replace with actual fetch:
-                    // const response = await fetch(url);
-                    // if (!response.ok) throw new Error(`HTTP error! status: ${response.status} for ${url}`);
-                    // return await response.text();
-
-                    // Simulation: Use rawDataSingleFileLines and modify course numbers
-                    const yearPrefix = String(index + 1);
-                    return rawDataSingleFileLines.map(line => {
-                        const parts = line.split(',');
-                        if (parts[0] && parts[0].length > 0) {
-                            parts[0] = yearPrefix + parts[0].substring(1);
-                        }
-                        return parts.join(',');
-                    }).join('\n');
+                // Fetch contents from actual Gist URLs
+                const fetchedContents = await Promise.all(gistFileUrls.map(async (url) => {
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        // Log the error but don't stop the whole process
+                        console.error(`Erreur lors du chargement de ${url}: ${response.status} ${response.statusText}`);
+                        return null; // Return null for failed fetches
+                    }
+                    return await response.text();
                 }));
 
+                // Process only successfully fetched contents
                 fetchedContents.forEach((content, index) => {
-                    processFileContent(content, index);
+                    if (content) { // Only process if content is not null (fetch was successful)
+                        processFileContent(content, index);
+                    }
                 });
 
                 // Hide loading message
@@ -524,32 +321,32 @@
                 };
 
                 // Create year selection buttons
-                sortedYears.forEach(year => {
-                    const button = document.createElement('button');
-                    button.textContent = `${getFrenchOrdinalYear(year)} année`;
-                    button.dataset.year = year; // Store the year in a data attribute
-                    button.classList.add('rounded-lg', 'px-4', 'py-2', 'font-semibold', 'text-white', 'shadow-md', 'transition-all', 'duration-200');
-
-                    button.addEventListener('click', () => {
-                        // Remove active class from all buttons
-                        document.querySelectorAll('.year-selector button').forEach(btn => {
-                            btn.classList.remove('active');
-                        });
-                        // Add active class to the clicked button
-                        button.classList.add('active');
-                        currentSelectedYear = year;
-                        renderTableForYear(year);
-                    });
-                    yearSelector.appendChild(button);
-                });
-
-                // Initially render the table for the first year and set its button as active
                 if (sortedYears.length > 0) {
+                    sortedYears.forEach(year => {
+                        const button = document.createElement('button');
+                        button.textContent = `${getFrenchOrdinalYear(year)} année`;
+                        button.dataset.year = year; // Store the year in a data attribute
+                        button.classList.add('rounded-lg', 'px-4', 'py-2', 'font-semibold', 'text-white', 'shadow-md', 'transition-all', 'duration-200');
+
+                        button.addEventListener('click', () => {
+                            // Remove active class from all buttons
+                            document.querySelectorAll('.year-selector button').forEach(btn => {
+                                btn.classList.remove('active');
+                            });
+                            // Add active class to the clicked button
+                            button.classList.add('active');
+                            currentSelectedYear = year;
+                            renderTableForYear(year);
+                        });
+                        yearSelector.appendChild(button);
+                    });
+
+                    // Initially render the table for the first year and set its button as active
                     renderTableForYear(currentSelectedYear);
                     yearSelector.querySelector(`button[data-year="${currentSelectedYear}"]`).classList.add('active');
                 } else {
                     noDataMessage.classList.remove('hidden');
-                    yearTitle.textContent = `Attribution des cours`;
+                    yearTitle.textContent = `Aucune donnée d'année trouvée`;
                 }
 
             } catch (error) {
