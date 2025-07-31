@@ -6,13 +6,14 @@
     <title>Attribution des Cours</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* Styles de base pour le corps et le conteneur, assurant la réactivité et une bonne esthétique */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f0f4f8;
             color: #334155;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
+            align-items: flex-start; /* Aligne les éléments en haut pour éviter le débordement du tableau */
             min-height: 100vh;
             padding: 2rem;
             box-sizing: border-box;
@@ -24,26 +25,29 @@
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             width: 100%;
             max-width: 1200px;
-            overflow-x: auto;
-            overflow-y: auto;
-            max-height: 95vh;
+            overflow-x: auto; /* Permet le défilement horizontal pour les tableaux larges */
+            overflow-y: auto; /* Permet le défilement vertical pour le contenu long */
+            max-height: 95vh; /* Limite la hauteur du conteneur pour éviter le débordement de toute la page */
         }
-        h2.year-title {
+        /* Style pour le titre principal */
+        h2.main-title {
             color: #1e293b;
             font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 2rem;
             text-align: center;
         }
-        .year-selector {
+        /* Style pour le conteneur des boutons de sélection d'année et de vue */
+        .year-selector, .view-selector {
             display: flex;
             justify-content: center;
             gap: 1rem;
             margin-bottom: 1.5rem;
-            flex-wrap: wrap;
+            flex-wrap: wrap; /* Permet aux boutons de passer à la ligne suivante sur les petits écrans */
         }
-        .year-selector button {
-            background-color: #3b82f6;
+        /* Style pour les boutons de sélection */
+        .year-selector button, .view-selector button {
+            background-color: #3b82f6; /* Couleur bleue */
             color: white;
             padding: 0.75rem 1.5rem;
             border-radius: 0.5rem;
@@ -53,115 +57,253 @@
             border: none;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-        .year-selector button:hover {
-            background-color: #2563eb;
-            transform: translateY(-2px);
+        .year-selector button:hover, .view-selector button:hover {
+            background-color: #2563eb; /* Bleu plus foncé au survol */
+            transform: translateY(-2px); /* Léger effet de soulèvement au survol */
         }
-        .year-selector button.active {
-            background-color: #1d4ed8;
-            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
-            transform: translateY(0);
+        .year-selector button.active, .view-selector button.active {
+            background-color: #1d4ed8; /* Bleu encore plus foncé pour l'état actif */
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); /* Ombre intérieure pour l'état actif */
+            transform: translateY(0); /* Pas de soulèvement pour l'état actif */
         }
+        /* Conteneur pour le tableau pour gérer le débordement et appliquer le rayon de bordure */
         .table-wrapper {
             overflow-x: auto;
             border-radius: 0.75rem;
             border: 1px solid #e2e8f0;
         }
+        /* Style général du tableau */
         table {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.85rem;
-            min-width: 800px;
+            min-width: 800px; /* Assure que le tableau est suffisamment large pour le contenu */
         }
+        /* Style pour les en-têtes et les cellules de données du tableau */
         th, td {
             padding: 0.75rem 0.7rem;
             text-align: center;
             border: 1px solid #e2e8f0;
-            white-space: nowrap;
+            white-space: nowrap; /* Empêche le texte de passer à la ligne dans les cellules */
         }
+        /* Style pour les en-têtes de tableau */
         th {
             background-color: #f0f4f8;
             color: #475569;
             font-weight: 600;
-            position: sticky;
+            position: sticky; /* Rend les en-têtes collants lors du défilement vertical */
             top: 0;
             z-index: 10;
         }
+        /* Style pour le premier en-tête de colonne (Classe / Cours ou Professeur / Cours) */
         th:first-child {
-            position: sticky;
+            position: sticky; /* Rend le premier en-tête de colonne collant lors du défilement horizontal */
             left: 0;
-            z-index: 11;
+            z-index: 11; /* Z-index plus élevé pour rester au-dessus des autres en-têtes collants */
             background-color: #f0f4f8;
         }
+        /* Style pour les premières cellules de données de colonne (noms de classe ou noms de professeur) */
         td:first-child {
-            position: sticky;
+            position: sticky; /* Rend les premières cellules de données de colonne collantes lors du défilement horizontal */
             left: 0;
             background-color: #f8fafc;
             font-weight: 500;
-            z-index: 9;
+            z-index: 9; /* Z-index inférieur aux en-têtes mais supérieur aux autres cellules */
         }
+        /* Effet de survol pour les lignes du tableau */
         tr:hover td {
             background-color: #e2e8f0;
         }
+        /* Effet de survol pour la première cellule de colonne dans une ligne survolée */
         tr:hover td:first-child {
-            background-color: #dbeafe;
+            background-color: #dbeafe; /* Bleu plus clair au survol pour la première colonne */
         }
-        .no-data {
+        /* Style pour les messages lorsqu'aucune donnée n'est disponible ou qu'une erreur se produit */
+        .no-data, .error-message {
             text-align: center;
             padding: 2rem;
             color: #64748b;
         }
+        /* Style spécifique pour les messages d'erreur */
+        .error-message {
+            color: #ef4444; /* Couleur rouge pour les erreurs */
+            font-weight: 600;
+        }
+        /* Style pour le message de chargement */
         .loading-message {
             text-align: center;
             padding: 2rem;
             color: #475569;
             font-size: 1.2rem;
         }
+        /* Utility class to hide elements */
+        .hidden {
+            display: none;
+        }
+
+        /* Styles spécifiques à la vue professeur */
+        .professor-list-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            background-color: #f8fafc;
+        }
+        .professor-list-container button {
+            background-color: #60a5fa;
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .professor-list-container button:hover {
+            background-color: #3b82f6;
+            transform: translateY(-1px);
+        }
+        .professor-list-container button.active {
+            background-color: #1d4ed8;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+            transform: translateY(0);
+        }
+
+        .professor-details-container {
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .professor-details-container h3 {
+            font-size: 1.875rem; /* text-3xl */
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .professor-details-container ul {
+            list-style: none;
+            padding: 0;
+        }
+        .professor-details-container ul li {
+            background-color: #e0f2fe;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            color: #1e40af;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .professor-details-container ul li strong {
+            color: #0c4a6e;
+        }
+        .professor-details-container .back-button {
+            background-color: #64748b;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            margin-top: 1.5rem;
+            display: block;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .professor-details-container .back-button:hover {
+            background-color: #475569;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2 id="yearTitle" class="year-title"></h2>
+        <h2 id="mainTitle" class="main-title"></h2>
 
-        <div id="yearSelector" class="year-selector">
-            <!-- Year selection buttons will be inserted here -->
+        <div id="viewSelector" class="view-selector mb-4">
+            <button id="showClassViewBtn" class="active">Attribution par Classe</button>
+            <button id="showProfessorViewBtn">Attribution par Professeur</button>
         </div>
 
-        <div class="table-wrapper">
-            <table id="courseMatrixTable">
-                <thead>
-                    <tr>
-                        <th>Classe / Cours</th>
-                        <!-- Course headers will be inserted here by JavaScript -->
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Matrix data will be inserted here by JavaScript -->
-                </tbody>
-            </table>
+        <div id="yearSelector" class="year-selector">
+            <!-- Les boutons de sélection d'année seront insérés ici par JavaScript -->
+        </div>
+
+        <div id="classViewContainer">
+            <div class="table-wrapper">
+                <table id="courseMatrixTable">
+                    <thead>
+                        <tr>
+                            <th>Classe / Cours</th>
+                            <!-- Les en-têtes de cours seront insérés ici par JavaScript -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Les données de la matrice seront insérées ici par JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="professorViewContainer" class="hidden">
+            <div id="professorListContainer" class="professor-list-container">
+                <!-- La liste des professeurs sera insérée ici par JavaScript -->
+            </div>
+            <div id="professorDetailsContainer" class="professor-details-container hidden">
+                <!-- Les détails du professeur sélectionné seront insérés ici par JavaScript -->
+                <button id="backToProfessorListBtn" class="back-button">Retour à la liste des professeurs</button>
+            </div>
         </div>
 
         <div id="loadingMessage" class="loading-message">
             Chargement des données...
         </div>
         <div id="noDataMessage" class="no-data hidden">
-            Aucune donnée à afficher pour l'année sélectionnée ou une erreur est survenue lors du chargement des fichiers.
+            Aucune donnée à afficher pour l'année sélectionnée.
+        </div>
+        <div id="errorMessage" class="error-message hidden">
+            Une erreur est survenue lors du chargement des fichiers de données. Veuillez vérifier les URLs ou réessayer plus tard.
+            <div id="failedUrls" class="text-sm mt-2 text-gray-500"></div>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
+            // Références aux éléments DOM
             const courseMatrixTable = document.getElementById('courseMatrixTable');
             const tableHeadRow = courseMatrixTable.querySelector('thead tr');
             const tableBody = courseMatrixTable.querySelector('tbody');
+
+            const professorListContainer = document.getElementById('professorListContainer');
+            const professorDetailsContainer = document.getElementById('professorDetailsContainer');
+            const backToProfessorListBtn = document.getElementById('backToProfessorListBtn');
+
             const noDataMessage = document.getElementById('noDataMessage');
             const loadingMessage = document.getElementById('loadingMessage');
-            const yearTitle = document.getElementById('yearTitle');
+            const errorMessage = document.getElementById('errorMessage');
+            const failedUrlsDiv = document.getElementById('failedUrls');
+            const mainTitle = document.getElementById('mainTitle');
             const yearSelector = document.getElementById('yearSelector');
+            const classViewContainer = document.getElementById('classViewContainer');
+            const professorViewContainer = document.getElementById('professorViewContainer');
+            const showClassViewBtn = document.getElementById('showClassViewBtn');
+            const showProfessorViewBtn = document.getElementById('showProfessorViewBtn');
 
-            // Hide table and show loading message initially
+            // Masque initialement les tableaux et les messages d'erreur, affiche le message de chargement
             courseMatrixTable.style.display = 'none';
+            professorViewContainer.classList.add('hidden'); // Masque le conteneur de la vue professeur
             noDataMessage.classList.add('hidden');
+            errorMessage.classList.add('hidden');
             loadingMessage.classList.remove('hidden');
 
             // --- Configuration des URLs de vos fichiers Gist ---
@@ -180,11 +322,21 @@
             ];
             // ---------------------------------------------------
 
-            // Map: year -> Map: className -> Map: courseGiven -> professorName
+            // Structures de données globales
+            // allYearsData: Map<année (string) -> Map<nomClasse (string) -> Map<nomCours (string) -> Set<nomProfesseur>>>>
             const allYearsData = new Map();
-            const uniqueYears = new Set();
+            // allProfessorsGlobalData: Map<nomProfesseur (string) -> Map<courseIdentifier (string) -> Set<className (string)>>>
+            // courseIdentifier est une combinaison de numeroCours (avec préfixe année) et nomCours (ex: "101_Mathématiques", "205_Histoire")
+            const allProfessorsGlobalData = new Map();
+            const uniqueYears = new Set(); // Utilisé principalement pour les boutons d'année de la vue par classe
+            let currentSelectedYear = null; // Stocke l'année actuellement sélectionnée pour la vue par classe
+            let currentView = 'class'; // 'class' ou 'professor'
 
-            // Function to convert digit to French ordinal
+            /**
+             * Convertit un chiffre représentant une année en sa forme ordinale française.
+             * @param {string} yearDigit - Le caractère numérique (par exemple, '1', '2').
+             * @returns {string} L'ordinal français (par exemple, 'première', 'deuxième').
+             */
             const getFrenchOrdinalYear = (yearDigit) => {
                 const ordinals = {
                     '1': 'première',
@@ -196,36 +348,41 @@
                     '7': 'septième',
                     '8': 'huitième',
                     '9': 'neuvième',
-                    '0': 'dixième' // Assuming '0' might represent 10th year if applicable
+                    '0': 'dixième' // Placeholder, assuming '0' might represent 10th year if applicable
                 };
-                return ordinals[yearDigit] || `${yearDigit}e`; // Fallback for unexpected digits
+                return ordinals[yearDigit] || `${yearDigit}e`; // Fallback pour les chiffres inattendus
             };
 
-            // Function to process a single file's content
+            /**
+             * Traite le contenu d'un seul fichier Gist et remplit les maps allYearsData et allProfessorsGlobalData.
+             * Il simule l'année en fonction de l'index du fichier dans le tableau gistFileUrls.
+             * @param {string} fileContent - Le contenu texte brut du fichier Gist.
+             * @param {number} yearIndex - L'index du fichier dans le tableau gistFileUrls (base 0).
+             */
             const processFileContent = (fileContent, yearIndex) => {
                 const lines = fileContent.trim().split('\n');
-                const yearPrefix = String(yearIndex + 1); // Year 1, 2, ..., 7
+                const yearPrefix = String(yearIndex + 1); // Simule l'année 1, 2, ..., 7 basée sur l'ordre des fichiers
 
                 lines.forEach(line => {
                     const parts = line.split(',');
+                    // S'assure que la ligne a suffisamment de parties pour extraire des données significatives
                     if (parts.length >= 7) {
-                        // Modify the course number based on the file's simulated year
-                        // This logic ensures that even if original Gist files have '1',
-                        // they are treated as '1', '2', '3', etc., based on their position in gistFileUrls.
                         let courseNumber = parts[0].trim();
+                        // Modifie le numéro de cours pour préfixer l'année simulée basée sur l'index du fichier
                         if (courseNumber.length > 0) {
                             courseNumber = yearPrefix + courseNumber.substring(1);
                         } else {
-                            courseNumber = yearPrefix + '000'; // Default if empty
+                            courseNumber = yearPrefix + '000'; // Valeur par défaut si le numéro de cours est vide
                         }
 
-                        const year = courseNumber.charAt(0); // Extract year from the modified course number
+                        const year = courseNumber.charAt(0); // Extrait l'année simulée
                         const className = parts[4].replace(/"/g, '').trim();
                         const professorName = parts[5].replace(/"/g, '').trim();
                         const courseGiven = parts[6].replace(/"/g, '').trim();
 
-                        uniqueYears.add(year);
+                        uniqueYears.add(year); // Ajoute l'année simulée à l'ensemble des années uniques (pour la vue par classe)
 
+                        // --- Remplissage de allYearsData (pour la vue par classe) ---
                         if (!allYearsData.has(year)) {
                             allYearsData.set(year, new Map());
                         }
@@ -234,127 +391,327 @@
                         if (!yearData.has(className)) {
                             yearData.set(className, new Map());
                         }
-                        yearData.get(className).set(courseGiven, professorName);
+                        const classCourseMap = yearData.get(className); // Récupère la map pour cette classe
+
+                        if (!classCourseMap.has(courseGiven)) { // Si ce cours (par nom) n'est pas encore dans cette classe
+                            classCourseMap.set(courseGiven, new Set()); // Initialise avec un Set de professeurs
+                        }
+                        classCourseMap.get(courseGiven).add(professorName); // Ajoute le professeur au Set
+
+                        // --- Remplissage de allProfessorsGlobalData (pour la vue par professeur, toutes années) ---
+                        if (!allProfessorsGlobalData.has(professorName)) {
+                            allProfessorsGlobalData.set(professorName, new Map());
+                        }
+                        const profCoursesMap = allProfessorsGlobalData.get(professorName);
+
+                        // Clé combinée pour identifier le cours (numéro de cours avec préfixe année + nom de cours)
+                        const courseIdentifier = `${courseNumber}_${courseGiven}`;
+                        if (!profCoursesMap.has(courseIdentifier)) {
+                            profCoursesMap.set(courseIdentifier, new Set());
+                        }
+                        profCoursesMap.get(courseIdentifier).add(className); // Ajoute la classe au Set
                     }
                 });
             };
 
-            try {
-                // Fetch contents from actual Gist URLs
-                const fetchedContents = await Promise.all(gistFileUrls.map(async (url) => {
-                    const response = await fetch(url);
-                    if (!response.ok) {
-                        // Log the error but don't stop the whole process
-                        console.error(`Erreur lors du chargement de ${url}: ${response.status} ${response.statusText}`);
-                        return null; // Return null for failed fetches
-                    }
-                    return await response.text();
-                }));
-
-                // Process only successfully fetched contents
-                fetchedContents.forEach((content, index) => {
-                    if (content) { // Only process if content is not null (fetch was successful)
-                        processFileContent(content, index);
+            /**
+             * Récupère le contenu de toutes les URLs Gist configurées et les traite.
+             * Signale toutes les URLs qui n'ont pas pu être chargées.
+             * @returns {Promise<string[]>} Une promesse qui se résout en un tableau d'URLs qui n'ont pas pu être chargées.
+             */
+            const fetchAndProcessGistData = async () => {
+                const failedUrls = [];
+                const fetchPromises = gistFileUrls.map(async (url, index) => {
+                    try {
+                        const response = await fetch(url);
+                        if (!response.ok) {
+                            // Enregistre l'erreur et ajoute l'URL à la liste des échecs, mais n'arrête pas les autres récupérations
+                            console.error(`Erreur lors du chargement de ${url}: ${response.status} ${response.statusText}`);
+                            failedUrls.push(url);
+                            return null; // Retourne null pour les récupérations échouées
+                        }
+                        return await response.text();
+                    } catch (error) {
+                        // Capture les erreurs réseau ou d'autres exceptions lors de la récupération
+                        console.error(`Erreur réseau ou autre lors du chargement de ${url}:`, error);
+                        failedUrls.push(url);
+                        return null;
                     }
                 });
 
-                // Hide loading message
-                loadingMessage.classList.add('hidden');
-                courseMatrixTable.style.display = 'table'; // Show table
+                const fetchedContents = await Promise.all(fetchPromises);
 
-                const sortedYears = Array.from(uniqueYears).sort();
-                let currentSelectedYear = sortedYears[0]; // Default to the first year
-
-                // Function to render the table for a given year
-                const renderTableForYear = (yearToRender) => {
-                    // Clear existing table content
-                    tableHeadRow.innerHTML = '<th>Classe / Cours</th>'; // Reset header
-                    tableBody.innerHTML = '';
-                    noDataMessage.classList.add('hidden');
-
-                    const yearData = allYearsData.get(yearToRender);
-
-                    if (!yearData || yearData.size === 0) {
-                        noDataMessage.classList.remove('hidden');
-                        yearTitle.textContent = `Attribution des cours de la ${getFrenchOrdinalYear(yearToRender)} année`;
-                        return;
+                // Traite uniquement les contenus récupérés avec succès
+                fetchedContents.forEach((content, index) => {
+                    if (content) {
+                        processFileContent(content, index);
                     }
+                });
+                return failedUrls;
+            };
 
-                    const uniqueClassesForYear = new Set();
-                    const uniqueCoursesForYear = new Set();
+            /**
+             * Rend le tableau d'attribution des cours pour une année spécifiée (vue par classe).
+             * @param {string} yearToRender - L'année pour laquelle afficher les données.
+             */
+            const renderTableForYear = (yearToRender) => {
+                // Efface le contenu existant du tableau avant de rendre de nouvelles données
+                tableHeadRow.innerHTML = '<th>Classe / Cours</th>'; // Réinitialise l'en-tête pour inclure uniquement la première colonne
+                tableBody.innerHTML = ''; // Efface toutes les lignes du corps du tableau
+                noDataMessage.classList.add('hidden'); // Masque le message "aucune donnée"
+                errorMessage.classList.add('hidden'); // Masque les messages d'erreur précédents
 
-                    // Collect unique classes and courses for the current year
-                    yearData.forEach((classMap, className) => {
-                        uniqueClassesForYear.add(className);
-                        classMap.forEach((professor, course) => {
-                            uniqueCoursesForYear.add(course);
+                const yearData = allYearsData.get(yearToRender);
+
+                // Si aucune donnée n'existe pour l'année sélectionnée, affiche un message et masque le tableau
+                if (!yearData || yearData.size === 0) {
+                    noDataMessage.classList.remove('hidden');
+                    mainTitle.textContent = `Attribution des cours de la ${getFrenchOrdinalYear(yearToRender)} année`;
+                    courseMatrixTable.style.display = 'none'; // Masque le tableau
+                    return;
+                }
+
+                const uniqueClassesForYear = new Set();
+                const uniqueCoursesForYear = new Set();
+
+                // Collecte tous les noms de classe et de cours uniques pour l'année en cours
+                yearData.forEach((classMap, className) => {
+                    uniqueClassesForYear.add(className);
+                    classMap.forEach((professorSet, course) => {
+                        uniqueCoursesForYear.add(course);
+                    });
+                });
+
+                // Trie les classes et les cours par ordre alphabétique pour un affichage cohérent
+                const sortedClasses = Array.from(uniqueClassesForYear).sort();
+                const sortedCourses = Array.from(uniqueCoursesForYear).sort();
+
+                // Met à jour le titre principal pour refléter l'année actuellement affichée
+                mainTitle.textContent = `Attribution des cours de la ${getFrenchOrdinalYear(yearToRender)} année`;
+
+                // Remplit les en-têtes du tableau avec les noms de cours triés
+                sortedCourses.forEach(course => {
+                    const th = document.createElement('th');
+                    th.textContent = course;
+                    tableHeadRow.appendChild(th);
+                });
+
+                // Remplit le corps du tableau avec les données de classe et les attributions de professeurs
+                sortedClasses.forEach(className => {
+                    const row = tableBody.insertRow(); // Crée une nouvelle ligne de tableau
+                    const classHeaderCell = row.insertCell(); // Crée la première cellule pour le nom de la classe
+                    classHeaderCell.textContent = className;
+
+                    // Pour chaque cours, trouve le professeur assigné ou affiche '/' si non assigné
+                    sortedCourses.forEach(courseName => {
+                        const cell = row.insertCell();
+                        const professorSet = yearData.has(className) &&
+                                             yearData.get(className).has(courseName) ?
+                                             yearData.get(className).get(courseName) : null;
+                        cell.textContent = professorSet ? Array.from(professorSet).sort().join(' / ') : '/';
+                    });
+                });
+                courseMatrixTable.style.display = 'table'; // Affiche le tableau une fois les données rendues
+            };
+
+            /**
+             * Rend la liste des professeurs (toutes années confondues) pour la vue par professeur.
+             */
+            const renderProfessorListViewGlobal = () => {
+                professorListContainer.innerHTML = ''; // Efface la liste existante
+                professorDetailsContainer.classList.add('hidden'); // Masque les détails du professeur
+                professorListContainer.classList.remove('hidden'); // S'assure que la liste des profs est visible
+
+                noDataMessage.classList.add('hidden');
+                errorMessage.classList.add('hidden');
+
+                if (allProfessorsGlobalData.size === 0) {
+                    noDataMessage.classList.remove('hidden');
+                    mainTitle.textContent = `Aucun professeur trouvé`;
+                    professorListContainer.classList.add('hidden'); // Masque la liste si pas de données
+                    return;
+                }
+
+                const sortedProfessors = Array.from(allProfessorsGlobalData.keys()).sort();
+
+                mainTitle.textContent = `Liste des Professeurs`;
+
+                sortedProfessors.forEach(professorName => {
+                    const button = document.createElement('button');
+                    button.textContent = professorName;
+                    button.dataset.professorName = professorName;
+                    button.classList.add('rounded-lg', 'px-4', 'py-2', 'font-semibold', 'text-white', 'shadow-md', 'transition-all', 'duration-200');
+
+                    button.addEventListener('click', () => {
+                        // Supprime la classe 'active' de tous les boutons de professeur
+                        document.querySelectorAll('.professor-list-container button').forEach(btn => {
+                            btn.classList.remove('active');
                         });
+                        // Ajoute la classe 'active' au bouton cliqué
+                        button.classList.add('active');
+                        displayProfessorDetailsGlobal(professorName);
                     });
+                    professorListContainer.appendChild(button);
+                });
+            };
 
-                    const sortedClasses = Array.from(uniqueClassesForYear).sort();
-                    const sortedCourses = Array.from(uniqueCoursesForYear).sort();
+            /**
+             * Affiche les détails des cours pour un professeur sélectionné (toutes années confondues).
+             * @param {string} professorName - Le nom du professeur.
+             */
+            const displayProfessorDetailsGlobal = (professorName) => {
+                professorListContainer.classList.add('hidden'); // Masque la liste des professeurs
+                professorDetailsContainer.classList.remove('hidden'); // Affiche le conteneur des détails
 
-                    // Update the year title
-                    yearTitle.textContent = `Attribution des cours de la ${getFrenchOrdinalYear(yearToRender)} année`;
+                professorDetailsContainer.innerHTML = `<h3>Cours de ${professorName}</h3><ul></ul>`;
+                const detailsList = professorDetailsContainer.querySelector('ul');
 
-                    // Populate table headers (courses)
-                    sortedCourses.forEach(course => {
-                        const th = document.createElement('th');
-                        th.textContent = course;
-                        tableHeadRow.appendChild(th);
+                const profCourseMap = allProfessorsGlobalData.get(professorName);
+
+                if (!profCourseMap || profCourseMap.size === 0) {
+                    detailsList.innerHTML = '<li>Aucun cours attribué pour ce professeur toutes années confondues.</li>';
+                } else {
+                    const sortedCourseIdentifiers = Array.from(profCourseMap.keys()).sort();
+                    sortedCourseIdentifiers.forEach(courseIdentifier => {
+                        // courseIdentifier est au format "numeroCours_nomCours" (ex: "101_Mathématiques", "205_Histoire")
+                        const [courseNumber, courseGiven] = courseIdentifier.split('_');
+                        const classSet = profCourseMap.get(courseIdentifier);
+                        const combinedClasses = Array.from(classSet).sort().join(''); // Classes accolées
+                        
+                        const listItem = document.createElement('li');
+                        // Format "2A REL" (classes accolées + nom du cours)
+                        listItem.innerHTML = `<span><strong>${combinedClasses}</strong> ${courseGiven}</span>`;
+                        detailsList.appendChild(listItem);
                     });
+                }
+                professorDetailsContainer.appendChild(backToProfessorListBtn); // Réajoute le bouton de retour
+                mainTitle.textContent = `Cours de ${professorName}`; // Met à jour le titre
+            };
 
-                    // Populate table body
-                    sortedClasses.forEach(className => {
-                        const row = tableBody.insertRow();
-                        const classHeaderCell = row.insertCell();
-                        classHeaderCell.textContent = className; // First cell is the class name
+            // Écouteur pour le bouton de retour à la liste des professeurs
+            backToProfessorListBtn.addEventListener('click', () => {
+                professorDetailsContainer.classList.add('hidden');
+                professorListContainer.classList.remove('hidden');
+                // Désactive le bouton actif du professeur
+                document.querySelectorAll('.professor-list-container button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                // Met à jour le titre principal pour la liste des professeurs
+                mainTitle.textContent = `Liste des Professeurs`;
+            });
 
-                        sortedCourses.forEach(courseName => {
-                            const cell = row.insertCell();
-                            const professor = yearData.has(className) &&
-                                              yearData.get(className).has(courseName) ?
-                                              yearData.get(className).get(courseName) : '/';
-                            cell.textContent = professor;
-                        });
-                    });
-                };
 
-                // Create year selection buttons
-                if (sortedYears.length > 0) {
-                    sortedYears.forEach(year => {
+            /**
+             * Crée et ajoute les boutons de sélection d'année au DOM (pour la vue par classe).
+             * @param {string[]} years - Un tableau de chaînes d'années uniques.
+             */
+            const createYearButtons = (years) => {
+                yearSelector.innerHTML = ''; // Efface les boutons existants
+                if (years.length > 0) {
+                    years.forEach(year => {
                         const button = document.createElement('button');
                         button.textContent = `${getFrenchOrdinalYear(year)} année`;
-                        button.dataset.year = year; // Store the year in a data attribute
+                        button.dataset.year = year; // Stocke l'année dans un attribut de données pour un accès facile
+                        // Ajoute les classes Tailwind CSS pour le style
                         button.classList.add('rounded-lg', 'px-4', 'py-2', 'font-semibold', 'text-white', 'shadow-md', 'transition-all', 'duration-200');
 
+                        // Ajoute un écouteur d'événements de clic pour changer d'année
                         button.addEventListener('click', () => {
-                            // Remove active class from all buttons
+                            // Supprime la classe 'active' de tous les boutons
                             document.querySelectorAll('.year-selector button').forEach(btn => {
                                 btn.classList.remove('active');
                             });
-                            // Add active class to the clicked button
+                            // Ajoute la classe 'active' au bouton cliqué
                             button.classList.add('active');
-                            currentSelectedYear = year;
-                            renderTableForYear(year);
+                            currentSelectedYear = year; // Met à jour l'année actuellement sélectionnée
+                            renderTableForYear(year); // Rend le tableau pour la vue par classe
                         });
                         yearSelector.appendChild(button);
                     });
+                }
+            };
 
-                    // Initially render the table for the first year and set its button as active
-                    renderTableForYear(currentSelectedYear);
-                    yearSelector.querySelector(`button[data-year="${currentSelectedYear}"]`).classList.add('active');
-                } else {
-                    noDataMessage.classList.remove('hidden');
-                    yearTitle.textContent = `Aucune donnée d'année trouvée`;
+            /**
+             * Fonction pour basculer entre la vue par classe et la vue par professeur.
+             * @param {string} viewMode - Le mode de vue à afficher ('class' ou 'professor').
+             */
+            const switchView = (viewMode) => {
+                currentView = viewMode;
+                // Gère la visibilité des conteneurs de vue
+                if (viewMode === 'class') {
+                    classViewContainer.classList.remove('hidden');
+                    professorViewContainer.classList.add('hidden');
+                    yearSelector.classList.remove('hidden'); // Affiche le sélecteur d'année pour la vue par classe
+                    courseMatrixTable.style.display = 'table'; // S'assure que le tableau est affiché
+                } else { // 'professor'
+                    classViewContainer.classList.add('hidden');
+                    professorViewContainer.classList.remove('hidden');
+                    yearSelector.classList.add('hidden'); // Masque le sélecteur d'année pour la vue par professeur
+                    courseMatrixTable.style.display = 'none'; // S'assure que l'autre tableau est masqué
+                    // S'assure que la liste des professeurs est visible et les détails masqués
+                    professorListContainer.classList.remove('hidden');
+                    professorDetailsContainer.classList.add('hidden');
                 }
 
-            } catch (error) {
-                console.error("Erreur lors du chargement des fichiers Gist :", error);
-                loadingMessage.classList.add('hidden');
-                noDataMessage.classList.remove('hidden');
-                yearTitle.textContent = `Erreur de chargement des données`;
-            }
+                // Gère l'état actif des boutons de sélection de vue
+                showClassViewBtn.classList.toggle('active', viewMode === 'class');
+                showProfessorViewBtn.classList.toggle('active', viewMode === 'professor');
+
+                // Rend la vue appropriée
+                if (viewMode === 'class') {
+                    if (currentSelectedYear) {
+                        renderTableForYear(currentSelectedYear);
+                    } else {
+                        // Si aucune année n'est sélectionnée (ex: premier chargement sans données)
+                        noDataMessage.classList.remove('hidden');
+                        mainTitle.textContent = `Aucune donnée d'année trouvée`;
+                        courseMatrixTable.style.display = 'none';
+                    }
+                } else { // 'professor'
+                    renderProfessorListViewGlobal();
+                }
+            };
+
+            // Écouteurs d'événements pour les boutons de commutation de vue
+            showClassViewBtn.addEventListener('click', () => switchView('class'));
+            showProfessorViewBtn.addEventListener('click', () => switchView('professor'));
+
+            /**
+             * Fonction d'initialisation principale qui orchestre la récupération des données, le traitement,
+             * la création des boutons et le rendu initial du tableau.
+             */
+            const init = async () => {
+                const failedUrls = await fetchAndProcessGistData(); // Récupère et traite toutes les données
+
+                loadingMessage.classList.add('hidden'); // Masque le message de chargement
+
+                // S'il y a eu des URLs échouées, affiche un message d'erreur
+                if (failedUrls.length > 0) {
+                    errorMessage.classList.remove('hidden');
+                    failedUrlsDiv.innerHTML = `Les fichiers suivants n'ont pas pu être chargés :<br>${failedUrls.map(url => `<code>${url}</code>`).join('<br>')}`;
+                    mainTitle.textContent = `Erreur de chargement des données`;
+                }
+
+                const sortedYears = Array.from(uniqueYears).sort(); // Récupère et trie les années uniques
+
+                // Si des données ont été chargées avec succès pour au moins une année
+                if (sortedYears.length > 0) {
+                    currentSelectedYear = sortedYears[0]; // Par défaut, la première année de la liste triée pour la vue par classe
+                    createYearButtons(sortedYears); // Crée les boutons de sélection d'année
+                    // Initialise la vue par classe par défaut
+                    switchView('class'); // Cela appellera renderTableForYear et définira le bouton actif
+                    yearSelector.querySelector(`button[data-year="${currentSelectedYear}"]`).classList.add('active');
+                } else {
+                    // Si aucune donnée n'a été trouvée après le traitement, affiche un message "aucune donnée"
+                    noDataMessage.classList.remove('hidden');
+                    mainTitle.textContent = `Aucune donnée d'année trouvée`;
+                    classViewContainer.style.display = 'none';
+                    professorViewContainer.style.display = 'none'; // S'assure que les deux sont masqués
+                    yearSelector.classList.add('hidden'); // Masque le sélecteur d'année s'il n'y a pas de données
+                }
+            };
+
+            init(); // Appelle la fonction d'initialisation principale lorsque le DOM est prêt
         });
     </script>
 </body>
